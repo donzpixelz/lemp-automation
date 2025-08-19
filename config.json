@@ -1,0 +1,132 @@
+{
+  "variables": {
+    "version": ""
+  },
+  "builders": [
+    {
+      "type": "virtualbox-iso",
+      "boot_command": [
+        "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks.cfg<enter><wait>"
+      ],
+      "boot_wait": "10s",
+      "disk_size": 81920,
+      "guest_os_type": "RedHat_64",
+      "headless": true,
+      "http_directory": "http",
+      "iso_urls": [
+        "/Users/.projects/isos/CentOS-8.2.2004-x86_64-dvd1.iso",
+        "http://mirror.ilumno.com/centos/8.2.2004/isos/x86_64/CentOS-8.2.2004-x86_64-dvd1.iso"
+      ],
+      "iso_checksum_type": "sha256",
+      "iso_checksum": "c87a2d81d67bbaeaf646aea5bedd70990078ec252fc52f5a7d65ff609871e255",
+      "ssh_username": "don",
+      "ssh_password": "Vikee@1208",
+      "ssh_port": 22,
+      "ssh_wait_timeout": "20000s",
+      "shutdown_command": "echo 'don'|sudo -S /sbin/halt -h -p",
+      "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
+      "virtualbox_version_file": ".vbox_version",
+      "vm_name": "lemp",
+      "vboxmanage": [
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--memory",
+          "2048"
+        ],
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--cpus",
+          "1"
+        ],
+        [
+          "sharedfolder",
+          "add",
+          "{{.Name}}",
+          "--name",
+          "seductivespells.com",
+          "--hostpath", "/Users/.projects/lemp/somesite.com",
+          "--automount",
+          "--auto-mount-point", "/mnt/somesite.com"
+        ],
+        [
+          "sharedfolder",
+          "add",
+          "{{.Name}}",
+          "--name",
+          "lemp.com",
+          "--hostpath", "/Users/.projects/lemp/lemp.com",
+          "--automount",
+          "--auto-mount-point", "/mnt/lemp.com"
+        ],
+        [
+          "sharedfolder",
+          "add",
+          "{{.Name}}",
+          "--name",
+          "conf.d",
+          "--hostpath", "/Users/.projects/lemp/conf.d",
+          "--automount",
+          "--auto-mount-point", "/etc/nginx/conf.d"
+        ],
+        [
+          "sharedfolder",
+          "add",
+          "{{.Name}}",
+          "--name",
+          "nginx-logs",
+          "--hostpath", "/Users/.projects/lemp/logs",
+          "--automount",
+          "--auto-mount-point", "/mnt/nginx-logs"
+        ],
+        [
+          "sharedfolder",
+          "add",
+          "{{.Name}}",
+          "--name",
+          "default.d",
+          "--hostpath", "/Users/.projects/lemp/default.d",
+          "--automount",
+          "--auto-mount-point", "/etc/nginx/default.d"
+        ],
+        [
+          "sharedfolder",
+          "add",
+          "{{.Name}}",
+          "--name",
+          "php-fpm.d",
+          "--hostpath", "/Users/.projects/lemp/php-fpm.d",
+          "--automount",
+          "--auto-mount-point", "/etc/php-fpm.d"
+        ],
+        [
+          "sharedfolder",
+          "add",
+          "{{.Name}}",
+          "--name",
+          "mysql-scripts",
+          "--hostpath", "/Users/.projects/lemp/mysql-scripts",
+          "--automount",
+          "--auto-mount-point", "/mnt/mysql-scripts"
+        ]
+      ],
+      "vboxmanage_post": [
+
+        ["modifyvm", "{{.Name}}",
+          "--nic1", "bridged",
+          "--bridgeadapter1", "en0",
+          "--macaddress1", "0800275F4D32"
+        ]
+      ]
+    }
+  ],
+  "provisioners": [{
+    "type": "shell",
+    "expect_disconnect": true,
+    "scripts": [
+      "provisioners/install-guest-additions.sh",
+      "provisioners/mysql-setup.sh"
+    ]
+  }]
+}
